@@ -11,9 +11,8 @@
 #   The authenticator plugin to use when requesting the certificate.
 # [*webroot_paths*]
 #   An array of webroot paths for the domains in `domains`.
-#   Required if using `plugin => 'webroot'`. If `domains` and
-#   `webroot_paths` are not the same length, `webroot_paths`
-#   will cycle to make up the difference.
+#   Required if using `plugin => 'webroot'`. `domains` and
+#   `webroot_paths` must be the same length
 # [*letsencrypt_command*]
 #   Command to run letsencrypt
 # [*additional_args*]
@@ -52,7 +51,7 @@ define letsencrypt::certonly (
 
   $command_start = "${letsencrypt_command} --agree-tos certonly -a ${plugin} "
   $command_domains = $plugin ? {
-    'webroot' => inline_template('<%= @domains.zip(@webroot_paths.cycle).map { |domain| "--webroot-path #{domain[1]} -d #{domain[0]}"}.join(" ") %>'),
+    'webroot' => inline_template('<%= @domains.zip(@webroot_paths).map { |domain| "--webroot-path #{domain[1]} -d #{domain[0]}"}.join(" ") %>'),
     default   => inline_template('-d <%= @domains.join(" -d ")%>'),
   }
   $command_end = inline_template('<% if @additional_args %> <%= @additional_args.join(" ") %><%end%>')
